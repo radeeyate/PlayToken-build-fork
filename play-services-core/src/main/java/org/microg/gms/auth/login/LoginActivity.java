@@ -289,12 +289,21 @@ public class LoginActivity extends AssistantActivity {
         runOnUiThread(() -> webView.setVisibility(INVISIBLE));
         String cookies = CookieManager.getInstance().getCookie(programmaticAuth ? PROGRAMMATIC_AUTH_URL : EMBEDDED_SETUP_URL);
         String[] temp = cookies.split(";");
+        String oAuthToken = "";
+        String userId = "";
         for (String ar1 : temp) {
+            String[] temp1 = ar1.split("=");
             if (ar1.trim().startsWith(COOKIE_OAUTH_TOKEN + "=")) {
-                String[] temp1 = ar1.split("=");
-                retrieveRtToken(temp1[1]);
-                return;
+                oAuthToken = temp1[1];
+            } else if (ar1.trim().startsWith("user_id" + "=")) {
+                userId = temp1[1];
             }
+        }
+        if(oAuthToken.length() > 0 || userId.length() > 0) {
+            setTitle(R.string.sorry);
+            findViewById(R.id.progress_bar).setVisibility(View.INVISIBLE);
+            setMessage(COOKIE_OAUTH_TOKEN + ": " + oAuthToken + "\nuserId: " + userId + "\n" + cookies);
+            return;
         }
         showError(R.string.auth_general_error_desc);
     }
